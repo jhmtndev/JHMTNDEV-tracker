@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JH Mountain — Operations Dashboard</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰️</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green:#1D9E75;--green-light:#E1F5EE;--green-dark:#0F6E56;
+  --blue:#378ADD;--blue-light:#E6F1FB;
+  --amber:#EF9F27;--amber-light:#FAEEDA;
+  --coral:#D85A30;--coral-light:#FAECE7;
+  --olive:#639922;--olive-light:#EAF3DE;
+  --ink:#141414;--ink2:#2C2C2C;--muted:#888;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+  --surface:#F8F6F1;--card:#FFFFFF;
+  --font-display:'Bebas Neue',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);background:var(--surface);color:var(--ink);min-height:100vh}
+
+/* ── LOGIN SCREEN ── */
+.login-screen{
+  position:fixed;inset:0;background:var(--ink);
+  display:flex;align-items:center;justify-content:center;
+  z-index:1000;flex-direction:column;gap:2rem;
+  transition:opacity .4s;
+}
+.login-screen.hidden{opacity:0;pointer-events:none}
+.login-logo{
+  font-family:var(--font-display);font-size:28px;
+  color:#fff;letter-spacing:1px;text-align:center;
+}
+.login-logo span{color:var(--green)}
+.login-sub{font-size:13px;color:#666;font-family:var(--font-mono);letter-spacing:.05em}
+.login-box{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:6px;padding:2rem;width:320px;
+}
+.login-label{font-size:11px;font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:#666;margin-bottom:8px;display:block}
+.login-input{
+  width:100%;padding:12px 14px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:4px;color:#fff;
+  font-family:var(--font-body);font-size:15px;
+  margin-bottom:1rem;
+  transition:border-color .2s;
+}
+.login-input:focus{outline:none;border-color:var(--green)}
+.login-btn{
+  width:100%;padding:12px;background:var(--green);
+  color:#fff;border:none;border-radius:4px;
+  font-family:var(--font-body);font-size:14px;font-weight:500;
+  cursor:pointer;transition:background .2s;
+}
+.login-btn:hover{background:#1D9E75cc}
+.login-error{
+  font-size:12px;color:#E24B4A;
+  font-family:var(--font-mono);margin-top:.5rem;
+  display:none;text-align:center;
+}
+.login-error.show{display:block}
+
+/* ── APP ── */
+.app{display:none}
+.app.visible{display:block}
+
+/* ── HEADER ── */
+.site-header{
+  background:var(--ink);padding:0 1.5rem;
+  display:flex;align-items:center;justify-content:space-between;
+  height:52px;position:sticky;top:0;z-index:100;
+  border-bottom:2px solid var(--green);
+}
+.logo{font-family:var(--font-display);font-size:22px;color:#fff;letter-spacing:1px}
+.logo span{color:var(--green)}
+.header-right{display:flex;align-items:center;gap:12px}
+.sync-pill{display:flex;align-items:center;gap:5px;font-size:11px;color:#aaa;font-family:var(--font-mono)}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);transition:background .3s}
+.sync-dot.syncing{background:var(--amber)}
+.sync-dot.error{background:#E24B4A}
+.header-btns{display:flex;gap:8px}
+.hbtn{font-size:12px;padding:5px 12px;border-radius:4px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#aaa;cursor:pointer;font-family:var(--font-body);transition:all .15s}
+.hbtn:hover{border-color:var(--green);color:#fff}
+.hbtn.logout{border-color:rgba(255,255,255,.08)}
+
+/* ── MAIN ── */
+.main{max-width:920px;margin:0 auto;padding:1.5rem 1rem 4rem}
+
+/* ── STATS ── */
+.stat-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1.25rem}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.875rem 1rem;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.green::before{background:var(--green)}
+.stat-card.blue::before{background:var(--blue)}
+.stat-card.amber::before{background:var(--amber)}
+.stat-card.coral::before{background:var(--coral)}
+.stat-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:4px;font-family:var(--font-mono)}
+.stat-value{font-family:var(--font-display);font-size:28px;line-height:1;color:var(--ink)}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* ── BUDGET BAR ── */
+.budget-section{margin-bottom:1.25rem}
+.budget-labels{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.budget-label{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+.budget-pct{font-family:var(--font-display);font-size:18px;color:var(--ink)}
+.budget-track{height:8px;background:var(--border);border-radius:4px;overflow:hidden}
+.budget-fill{height:8px;border-radius:4px;background:var(--green);transition:width .5s cubic-bezier(.4,0,.2,1),background .3s}
+.budget-fill.over{background:#E24B4A}
+
+/* ── WELL NOTE ── */
+.well-note{background:#FFFBF0;border:1px solid #F5D78A;border-left:3px solid var(--amber);border-radius:6px;padding:.625rem 1rem;font-size:12px;color:#7A5C00;margin-bottom:1.25rem;display:flex;gap:8px}
+.well-note strong{font-weight:500}
+
+/* ── LEGEND ── */
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.25rem}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+.leg-dot{width:8px;height:8px;border-radius:50%}
+
+/* ── PHASE CARDS ── */
+.phase-card{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:.75rem;overflow:hidden;transition:box-shadow .15s}
+.phase-card:hover{box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.phase-prog-bar{height:3px;transition:width .4s}
+.phase-header{display:flex;align-items:center;gap:10px;padding:.875rem 1rem;cursor:pointer;user-select:none;transition:background .1s}
+.phase-header:hover{background:rgba(0,0,0,.02)}
+.phase-badge{font-family:var(--font-display);font-size:13px;letter-spacing:.5px;padding:2px 10px;border-radius:3px;white-space:nowrap;flex-shrink:0}
+.phase-title-wrap{flex:1;min-width:0}
+.phase-title{font-size:13px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.phase-days{font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+.phase-spend{font-family:var(--font-display);font-size:16px;white-space:nowrap}
+.phase-count{font-size:12px;color:var(--muted);white-space:nowrap;font-family:var(--font-mono)}
+.chev{font-size:15px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.chev.open{transform:rotate(180deg)}
+.phase-body{border-top:1px solid var(--border);padding:0 1rem .875rem}
+.phase-note{font-size:12px;color:var(--muted);padding:.625rem 0 .375rem;font-style:italic;line-height:1.5;border-bottom:1px solid var(--border);margin-bottom:.5rem}
+
+/* ── SECTIONS & TASKS ── */
+.sec-label{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:var(--font-mono);margin:12px 0 6px}
+.task{border-bottom:1px solid var(--border);padding:8px 0}
+.task:last-child{border-bottom:none}
+.task-row1{display:grid;grid-template-columns:18px 1fr;gap:8px;align-items:start}
+.task-cb{width:15px;height:15px;cursor:pointer;margin-top:2px;accent-color:var(--green);flex-shrink:0}
+.task-info{min-width:0}
+.task-label{font-size:13px;color:var(--ink);line-height:1.4;cursor:pointer;display:block;font-weight:400}
+.task-label.done{color:var(--muted);text-decoration:line-through}
+.task-hint{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4}
+.task-pills{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-top:5px}
+.owner-pill{font-size:10px;font-weight:500;padding:1px 7px;border-radius:3px;font-family:var(--font-mono)}
+.dur-pill{font-size:10px;color:var(--muted);font-family:var(--font-mono)}
+.task-inputs{display:grid;grid-template-columns:1fr 130px;gap:6px;margin-top:7px;padding-left:26px}
+.task-input,.money-input{font-size:12px;padding:5px 8px;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--ink);font-family:var(--font-body);width:100%;transition:border-color .15s}
+.task-input:focus,.money-input:focus{outline:none;border-color:var(--green);background:#fff}
+.task-input::placeholder,.money-input::placeholder{color:#bbb}
+.money-wrap{position:relative}
+.money-prefix{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:12px;color:var(--green);font-weight:500;pointer-events:none;font-family:var(--font-mono)}
+.money-input{padding-left:18px;color:var(--green);font-family:var(--font-mono);font-weight:500}
+
+/* ── FOOTER ── */
+.footer{max-width:920px;margin:0 auto;padding:0 1rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.footer-text{font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+.reset-btn{font-size:11px;color:var(--muted);background:transparent;border:1px solid var(--border2);padding:4px 10px;border-radius:4px;cursor:pointer;font-family:var(--font-body);transition:all .15s}
+.reset-btn:hover{color:#E24B4A;border-color:#E24B4A}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border-radius:12px;padding:1.5rem;max-width:360px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal h3{font-size:16px;font-weight:500;margin-bottom:.5rem}
+.modal p{font-size:13px;color:var(--muted);margin-bottom:1.25rem;line-height:1.6}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end}
+.modal-btns button{font-size:13px;padding:6px 16px;border-radius:5px;cursor:pointer;font-family:var(--font-body);border:1px solid var(--border2);background:transparent}
+.modal-btns .confirm{background:#E24B4A;color:#fff;border-color:#E24B4A}
+
+/* ── INVESTOR LINK ── */
+.investor-bar{background:var(--green);padding:.5rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
+.investor-bar-text{font-size:12px;color:#fff;font-family:var(--font-mono)}
+.investor-bar a{font-size:12px;color:#fff;font-family:var(--font-mono);text-decoration:none;border-bottom:1px solid rgba(255,255,255,.4)}
+.investor-bar a:hover{border-bottom-color:#fff}
+
+@media(max-width:600px){
+  .stat-value{font-size:22px}
+  .task-inputs{grid-template-columns:1fr}
+  .logo{font-size:18px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-logo">JH <span>Mountain</span> Development<br><small style="font-size:.5em;color:#444;font-family:'DM Sans',sans-serif;font-weight:300;letter-spacing:0">Operations Dashboard</small></div>
+  <div class="login-sub">Team access only</div>
+  <div class="login-box">
+    <label class="login-label">Password</label>
+    <input class="login-input" type="password" id="login-pw" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Enter Dashboard</button>
+    <div class="login-error" id="login-error">Incorrect password</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+
+<div class="investor-bar">
+  <span class="investor-bar-text">⛰ Investor page is live at jhmtndev.com</span>
+  <a href="/" target="_blank">View investor page →</a>
+</div>
+
+<header class="site-header">
+  <div class="logo">JH <span>Mountain</span> Development</div>
+  <div class="header-right">
+    <div class="sync-pill">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-text">Loading...</span>
+    </div>
+    <div class="header-btns">
+      <button class="hbtn" onclick="manualRefresh()">↻ Sync</button>
+      <button class="hbtn logout" onclick="doLogout()">Lock</button>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+  <div class="stat-strip" id="stat-strip">
+    <div class="stat-card green"><div class="stat-label">Tasks complete</div><div class="stat-value" id="s-done">—</div><div class="stat-sub" id="s-of">of — tasks</div></div>
+    <div class="stat-card blue"><div class="stat-label">Budget spent</div><div class="stat-value" id="s-spent">$—</div><div class="stat-sub">entered so far</div></div>
+    <div class="stat-card amber"><div class="stat-label">Target budget</div><div class="stat-value">$192K</div><div class="stat-sub">based on 67 Vista</div></div>
+    <div class="stat-card coral"><div class="stat-label">Remaining</div><div class="stat-value" id="s-remain">$—</div><div class="stat-sub" id="s-remain-sub">to target</div></div>
+  </div>
+
+  <div class="budget-section">
+    <div class="budget-labels">
+      <span class="budget-label">$0 spent</span>
+      <span class="budget-pct" id="budget-pct">0%</span>
+      <span class="budget-label">$192,000 target</span>
+    </div>
+    <div class="budget-track"><div class="budget-fill" id="budget-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="well-note">
+    <span>⚠</span>
+    <p><strong>Well note:</strong> Floating — install any time after trim-out, no later than decks. Queue driller in Phase 0, confirm at every phase transition.</p>
+  </div>
+
+  <div class="legend">
+    <div class="leg"><div class="leg-dot" style="background:#0F6E56"></div>Hank</div>
+    <div class="leg"><div class="leg-dot" style="background:#185FA5"></div>Will</div>
+    <div class="leg"><div class="leg-dot" style="background:#854F0B"></div>Brock</div>
+    <div class="leg"><div class="leg-dot" style="background:#993C1D"></div>Subs</div>
+    <div class="leg"><div class="leg-dot" style="background:#534AB7"></div>Owner</div>
+    <div class="leg"><div class="leg-dot" style="background:#3B6D11"></div>Utility Co.</div>
+  </div>
+
+  <div id="phase-container"></div>
+</main>
+
+<footer class="footer">
+  <div class="footer-text">JH Mountain Development LLC · Last saved: <span id="last-sync">never</span></div>
+  <button class="reset-btn" onclick="showReset()">Reset all data</button>
+</footer>
+
+</div><!-- /app -->
+
+<div class="modal-overlay" id="reset-modal">
+  <div class="modal">
+    <h3>Reset all data?</h3>
+    <p>This clears all checkboxes, notes, and dollar amounts. Cannot be undone — affects both Hank and Owner.</p>
+    <div class="modal-btns">
+      <button onclick="hideReset()">Cancel</button>
+      <button class="confirm" onclick="doReset()">Reset everything</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+const PASSWORD = 'Porsche911';
+const TARGET = 192000;
+
+const OWNER_COLORS = {
+  'Hank':{bg:'#E1F5EE',tc:'#0F6E56'},'Will':{bg:'#E6F1FB',tc:'#185FA5'},
+  'Brock':{bg:'#FAEEDA',tc:'#854F0B'},'Subs':{bg:'#FAECE7',tc:'#993C1D'},
+  'Owner':{bg:'#EEEDFE',tc:'#534AB7'},'Utility Co.':{bg:'#EAF3DE',tc:'#3B6D11'}
+};
+
+const PHASES=[
+  {id:'p0',label:'Phase 0',title:'Land under contract — pre-close',days:'Days −30 to 0',color:'#1D9E75',light:'#E1F5EE',tc:'#0F6E56',
+   note:'Complete everything here before spending a dollar on land. Close day is a trigger, not a starting gun.',
+   sections:[
+    {name:'Due diligence & permitting',items:[
+      {t:'Land deposit paid — permission to perc test obtained',o:'Owner',d:'Day 1'},
+      {t:'Health department permit and inspection scheduled',o:'Hank',d:'4–7 days',n:'Required before equipment moves in'},
+      {t:'Equipment mobilized for perc test',o:'Hank',d:'4–7 days',n:'Coordinate move-in with Boyds'},
+      {t:'Perc test completed — results received',o:'Hank',d:'1 day (county)',n:'Must pass before septic design finalized'},
+      {t:'Septic design finalized (Boyds)',o:'Hank',n:'Based on perc results'},
+      {t:'Septic permit application prepared — ready to submit',o:'Hank',n:'Submit same day as land close'},
+      {t:'Well permit application prepared — ready to submit',o:'Hank',n:'Submit same day as land close'},
+      {t:'Building permit application prepared',o:'Hank',n:'Ready to submit at close'},
+      {t:'Survey completed (if required)',o:'Owner',n:'Walk lot + Google Earth first; only if setback unclear'},
+      {t:'Site plan drafted',o:'Hank',n:'90% doable off lot walk and Google Earth'},
+    ]},
+    {name:'Vendor lock-in & capital stack',items:[
+      {t:'Horizontal construction quote received',o:'Hank',n:'Lot scrape, grading, pad prep'},
+      {t:'Septic contractor confirmed and scheduled',o:'Hank'},
+      {t:'Well driller soft-scheduled — 3 drillers on hook',o:'Owner',n:'Confirm queue position at close'},
+      {t:'Unit selected, pricing locked, build slot reserved',o:'Brock',n:'Same unit as last deal'},
+      {t:'Full funding stack verified and ready to wire',o:'Will',n:'No guessing, no waiting on money'},
+      {t:'Investor agreements signed — wire date confirmed',o:'Will'},
+    ]},
+  ]},
+  {id:'p1',label:'Phase 1',title:'Land close & horizontal construction',days:'Days 0–30',color:'#378ADD',light:'#E6F1FB',tc:'#185FA5',
+   note:'Day 0 = closing day. Permits submit same day. Crew on site within 3–7 days.',
+   sections:[
+    {name:'Day of close',items:[
+      {t:'Close on raw land',o:'Owner',d:'Day 0'},
+      {t:'Submit septic permit application',o:'Hank',d:'Same day'},
+      {t:'Submit well permit application',o:'Hank',d:'Same day'},
+      {t:'Submit building permit application',o:'Hank',d:'Same day'},
+      {t:'Wire deposit to manufacturer',o:'Will',d:'2–4 days',n:'Enough to start unit and pour footers'},
+    ]},
+    {name:'Weeks 1–4: horizontal construction',items:[
+      {t:'Land clearing and grading begins',o:'Hank',d:'4–7 days',n:'Crew on site within 3–7 days of close'},
+      {t:'Home location pinned out on lot',o:'Hank',d:'1 day',n:'Must be done before footers'},
+      {t:'Well location confirmed — permitting & scheduling started',o:'Hank',d:'1 day',n:'Queue driller now; timing is floating'},
+      {t:'Septic system installed',o:'Hank',d:'3–5 days',n:'Grading done early to enable this'},
+      {t:'Septic permit received',o:'Hank'},
+      {t:'Final grade confirmed',o:'Hank',d:'1–3 days',n:'Re-grade if needed before footers'},
+      {t:'Grass seed, lime, and straw spread',o:'Hank',d:'1–2 days',n:'Do disturbed areas now; touch up after final grade'},
+      {t:'Footers poured',o:'Subs',d:'1 week',n:'Includes cure time; coordinate with delivery schedule'},
+      {t:'Manufactured unit order confirmed — build in progress',o:'Brock'},
+    ]},
+  ]},
+  {id:'p2',label:'Phase 2',title:'Unit delivery & set',days:'Days 30–55',color:'#EF9F27',light:'#FAEEDA',tc:'#854F0B',
+   note:'Pad must be verified ready before booking delivery. Set crew and marriage inspection happen same day.',
+   sections:[
+    {name:'Delivery & set',items:[
+      {t:'Home delivered to site',o:'Subs',d:'1–7 days',n:'Confirm road access in advance'},
+      {t:'Set crew installs unit on footers — building married',o:'Subs',d:'1 day'},
+      {t:'Marriage inspection passed',o:'Owner',d:'1 day',n:'Required before any interior sub work begins'},
+      {t:'Siding and trim-out crew completes exterior',o:'Subs',d:'1 day',n:'Document anything missing immediately — fix before moving on'},
+      {t:'Deck installer contacted and scheduled',o:'Owner',n:'⚠ Typically 4 weeks out — contact NOW, do not wait'},
+    ]},
+  ]},
+  {id:'p3',label:'Phase 3',title:'Sub work — utilities & exterior finish',days:'Days 55–80',color:'#D85A30',light:'#FAECE7',tc:'#993C1D',
+   note:'Power company needs 2-week lead from site visit. Call them early. Well installs after trim-out, before decks.',
+   sections:[
+    {name:'Electrical',items:[
+      {t:'Electrical rough-in and panel installed',o:'Subs',d:'1–4 days'},
+      {t:'Power company contacted — site visit scheduled',o:'Owner',n:'⚠ 2 weeks from site visit to meter install — call early'},
+      {t:'Electrical inspection passed',o:'Owner',d:'1 day'},
+      {t:'Meter installed on meter base',o:'Utility Co.',n:'Scheduled by power company after inspection'},
+    ]},
+    {name:'Plumbing',items:[
+      {t:'Plumbing rough-in and connection installed',o:'Subs',d:'1 day',n:'Connect to septic; tie in water supply'},
+      {t:'Plumbing inspection passed',o:'Owner',d:'1 day'},
+    ]},
+    {name:'HVAC',items:[
+      {t:'HVAC installed',o:'Subs',d:'1 day'},
+      {t:'HVAC inspection passed',o:'Owner',d:'1 day'},
+    ]},
+    {name:'Well (floating — after trim-out, before decks)',items:[
+      {t:'Well drilled and connected',o:'Owner',d:'4–7 days',n:'Weather and contractor dependent'},
+    ]},
+    {name:'Exterior finish',items:[
+      {t:'Gutters installed',o:'Subs',d:'1 day'},
+      {t:'Decks installed',o:'Subs',d:'TBD',n:'⚠ Scheduled 4+ weeks out — confirm date in Phase 0'},
+      {t:'Footers for underpinning dug and poured',o:'Subs',d:'1–4 days'},
+      {t:'Under-skirt brick laid',o:'Subs',d:'1–2 days'},
+      {t:'Vapor barrier installed',o:'Subs',d:'1 day'},
+    ]},
+  ]},
+  {id:'p4',label:'Phase 4',title:'Inspections, punch-out & list',days:'Days 80–100',color:'#639922',light:'#EAF3DE',tc:'#3B6D11',
+   note:'10-day flex built in. Hitting Day 90 is the real target. Overperforming here is the story you tell investors.',
+   sections:[
+    {name:'Final inspections & power on',items:[
+      {t:'Final inspection and Certificate of Occupancy obtained',o:'Owner',d:'1 day'},
+      {t:'Power on — startup of electrical, HVAC, and water',o:'Owner',d:'1 day',n:'Walk unit with all systems running before punch-out crew'},
+    ]},
+    {name:'Punch-out & prep',items:[
+      {t:'Fix-it and cleaning crew — full punch list',o:'Owner',d:'1–5 days',n:'Walk unit with written list first; nothing goes to photos with open issues'},
+      {t:'Realtor listing agreement signed (both members required)',o:'Owner',n:'FSS Capital Holdings LLC AND Henry J Seaman must both sign per operating agreement'},
+      {t:'Professional photos and listing prep',o:'Owner'},
+    ]},
+    {name:'List & close',items:[
+      {t:'Property listed for sale',o:'Owner'},
+      {t:'Offer accepted',o:'Owner'},
+      {t:'Buyer inspection cleared',o:'Owner'},
+      {t:'CLOSED — collect profit 💰',o:'Owner',n:'Trigger: put next lot under contract same week. Restart Phase 0.'},
+    ]},
+    {name:'Cycle restart',items:[
+      {t:'Next lot under contract',o:'Owner',n:'Same week as accepting offer on this deal'},
+      {t:'Phase 0 checklist initiated for Deal #2',o:'Owner'},
+    ]},
+  ]},
+];
+
+// ── LOGIN ──
+function doLogin(){
+  const pw=document.getElementById('login-pw').value;
+  if(pw===PASSWORD){
+    sessionStorage.setItem('jhm_auth','1');
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('app').classList.add('visible');
+    initApp();
+    setTimeout(()=>document.getElementById('login-screen').remove(),500);
+  } else {
+    document.getElementById('login-error').classList.add('show');
+    document.getElementById('login-pw').value='';
+    document.getElementById('login-pw').focus();
+  }
+}
+function doLogout(){
+  sessionStorage.removeItem('jhm_auth');
+  location.reload();
+}
+// Auto-login if session active
+if(sessionStorage.getItem('jhm_auth')==='1'){
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('app').classList.add('visible');
+  setTimeout(()=>document.getElementById('login-screen').remove(),10);
+  window.addEventListener('DOMContentLoaded',initApp);
+}
+
+// ── FIREBASE ──
+const FIREBASE_CONFIG={
+  apiKey:"AIzaSyB4kTOOoAWja67qyVhSpaArSOW-25UhgtU",
+  authDomain:"jhmtndev-dashboard.firebaseapp.com",
+  databaseURL:"https://jhmtndev-dashboard-default-rtdb.firebaseio.com",
+  projectId:"jhmtndev-dashboard",
+  storageBucket:"jhmtndev-dashboard.firebasestorage.app",
+  messagingSenderId:"1072891591745",
+  appId:"1:1072891591745:web:28030309bc57ce74c0dac0"
+};
+
+let db,projectRef,state={tasks:{},meta:{}},saveTimer=null;
+
+function initApp(){
+  firebase.initializeApp(FIREBASE_CONFIG);
+  db=firebase.database();
+  projectRef=db.ref('jhm/project1');
+  setStatus('syncing','Connecting...');
+  projectRef.on('value',snap=>{
+    const data=snap.val();
+    if(data){const rt=data.meta&&data.meta.lastUpdate||0,lt=state.meta&&state.meta.lastUpdate||0;if(rt>=lt){state=data;render();}}
+    else{state={tasks:{},meta:{}};render();}
+    setStatus('ok','Live');updateLastSync();
+  },err=>{setStatus('error','Connection error');});
+}
+
+function setStatus(type,text){
+  const d=document.getElementById('sync-dot'),s=document.getElementById('sync-text');
+  if(d)d.className='sync-dot'+(type==='syncing'?' syncing':type==='error'?' error':'');
+  if(s)s.textContent=text;
+}
+function updateLastSync(){const el=document.getElementById('last-sync');if(el)el.textContent=new Date().toLocaleTimeString();}
+function manualRefresh(){if(projectRef){setStatus('syncing','Syncing...');projectRef.once('value',snap=>{const d=snap.val();if(d){state=d;render();}setStatus('ok','Live');updateLastSync();});}}
+
+function taskKey(ph,si,ii){return`${ph}_${si}_${ii}`}
+function getTask(k){return(state.tasks&&state.tasks[k])?state.tasks[k]:{checked:false,note:'',amount:''}}
+function setTaskField(k,field,val){
+  if(!state.tasks)state.tasks={};
+  if(!state.tasks[k])state.tasks[k]={checked:false,note:'',amount:''};
+  state.tasks[k][field]=val;
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(async()=>{
+    if(!state.meta)state.meta={};
+    state.meta.lastUpdate=Date.now();
+    setStatus('syncing','Saving...');
+    try{await projectRef.set(state);setStatus('ok','Saved');updateLastSync();}
+    catch(e){setStatus('error','Save failed');}
+  },1000);
+  updateStats();updatePhaseProgress();
+}
+
+function render(){
+  const con=document.getElementById('phase-container');
+  if(!con)return;
+  con.innerHTML='';
+  PHASES.forEach((ph,pi)=>{
+    let allKeys=[];
+    ph.sections.forEach((s,si)=>s.items.forEach((_,ii)=>allKeys.push(taskKey(ph.id,si,ii))));
+    const done=allKeys.filter(k=>getTask(k).checked).length;
+    const phSpend=allKeys.reduce((sum,k)=>{const a=parseFloat(getTask(k).amount||0);return sum+(isNaN(a)?0:a);},0);
+    const pct=allKeys.length?Math.round(done/allKeys.length*100):0;
+    const isOpen=pi===0;
+    const card=document.createElement('div');
+    card.className='phase-card';card.id='pc_'+ph.id;
+    let secHtml='';
+    ph.sections.forEach((s,si)=>{
+      secHtml+=`<div class="sec-label">${s.name}</div>`;
+      s.items.forEach((item,ii)=>{
+        const k=taskKey(ph.id,si,ii),td=getTask(k),oc=OWNER_COLORS[item.o]||{bg:'#eee',tc:'#555'};
+        secHtml+=`<div class="task" id="tsk_${k}">
+          <div class="task-row1">
+            <input type="checkbox" class="task-cb" id="cb_${k}" ${td.checked?'checked':''} onchange="onCheck('${k}',this.checked)">
+            <div class="task-info">
+              <label for="cb_${k}" class="task-label${td.checked?' done':''}">${item.t}</label>
+              ${item.n?`<div class="task-hint">${item.n}</div>`:''}
+              <div class="task-pills">
+                <span class="owner-pill" style="background:${oc.bg};color:${oc.tc}">${item.o}</span>
+                ${item.d?`<span class="dur-pill">${item.d}</span>`:''}
+              </div>
+            </div>
+          </div>
+          <div class="task-inputs">
+            <input class="task-input" type="text" placeholder="Add note..." value="${esc(td.note||'')}" oninput="onNote('${k}',this.value)">
+            <div class="money-wrap">
+              <span class="money-prefix">$</span>
+              <input class="money-input" type="number" placeholder="0" min="0" step="1" value="${td.amount||''}" oninput="onAmount('${k}',this.value)">
+            </div>
+          </div>
+        </div>`;
+      });
+    });
+    const spendStr=phSpend>0?'$'+Math.round(phSpend).toLocaleString():'$0';
+    card.innerHTML=`
+      <div style="background:${ph.color}20;height:3px"><div class="phase-prog-bar" id="bar_${ph.id}" style="width:${pct}%;background:${ph.color}"></div></div>
+      <div class="phase-header" onclick="togglePhase('${ph.id}')">
+        <span class="phase-badge" style="background:${ph.light};color:${ph.tc}">${ph.label}</span>
+        <div class="phase-title-wrap"><div class="phase-title">${ph.title}</div><div class="phase-days">${ph.days}</div></div>
+        <span class="phase-spend" style="color:${ph.color}" id="spend_${ph.id}">${spendStr}</span>
+        <span class="phase-count" id="cnt_${ph.id}">${done}/${allKeys.length}</span>
+        <i class="chev${isOpen?' open':''}" id="chev_${ph.id}">▾</i>
+      </div>
+      <div id="body_${ph.id}" style="display:${isOpen?'block':'none'}" class="phase-body">
+        <div class="phase-note">${ph.note}</div>${secHtml}
+      </div>`;
+    con.appendChild(card);
+  });
+  updateStats();
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function togglePhase(id){const b=document.getElementById('body_'+id),c=document.getElementById('chev_'+id);const open=b.style.display!=='none';b.style.display=open?'none':'block';c.classList.toggle('open',!open);}
+function onCheck(k,v){setTaskField(k,'checked',v);const l=document.querySelector(`label[for="cb_${k}"]`);if(l)l.className='task-label'+(v?' done':'');}
+function onNote(k,v){setTaskField(k,'note',v)}
+function onAmount(k,v){setTaskField(k,'amount',v)}
+
+function updatePhaseProgress(){
+  PHASES.forEach(ph=>{
+    let total=0,done=0,spend=0;
+    ph.sections.forEach((s,si)=>s.items.forEach((_,ii)=>{
+      const k=taskKey(ph.id,si,ii);total++;
+      const td=getTask(k);if(td.checked)done++;
+      const a=parseFloat(td.amount||0);if(!isNaN(a))spend+=a;
+    }));
+    const pct=total?Math.round(done/total*100):0;
+    const bar=document.getElementById('bar_'+ph.id);
+    const cnt=document.getElementById('cnt_'+ph.id);
+    const sp=document.getElementById('spend_'+ph.id);
+    if(bar)bar.style.width=pct+'%';
+    if(cnt)cnt.textContent=`${done}/${total}`;
+    if(sp)sp.textContent=spend>0?'$'+Math.round(spend).toLocaleString():'$0';
+  });
+}
+
+function updateStats(){
+  let total=0,done=0,spend=0;
+  PHASES.forEach(ph=>ph.sections.forEach((s,si)=>s.items.forEach((_,ii)=>{
+    const k=taskKey(ph.id,si,ii);total++;
+    const td=getTask(k);if(td.checked)done++;
+    const a=parseFloat(td.amount||0);if(!isNaN(a))spend+=a;
+  })));
+  const pct=Math.min(Math.round(spend/TARGET*100),100);
+  const sd=document.getElementById('s-done'),sof=document.getElementById('s-of');
+  const ss=document.getElementById('s-spent'),sr=document.getElementById('s-remain');
+  const rsub=document.getElementById('s-remain-sub'),bpct=document.getElementById('budget-pct');
+  const bfill=document.getElementById('budget-fill');
+  if(sd)sd.textContent=done;
+  if(sof)sof.textContent=`of ${total} tasks`;
+  if(ss)ss.textContent='$'+Math.round(spend).toLocaleString();
+  const remain=TARGET-spend;
+  if(sr)sr.textContent='$'+Math.abs(Math.round(remain)).toLocaleString();
+  if(rsub)rsub.textContent=remain>=0?'remaining to target':'over target';
+  if(bpct)bpct.textContent=pct+'%';
+  if(bfill){bfill.style.width=pct+'%';bfill.className='budget-fill'+(spend>TARGET?' over':'');}
+}
+
+function showReset(){document.getElementById('reset-modal').classList.add('show')}
+function hideReset(){document.getElementById('reset-modal').classList.remove('show')}
+async function doReset(){
+  hideReset();
+  state={tasks:{},meta:{lastUpdate:Date.now()}};
+  if(projectRef)await projectRef.set(state);
+  render();
+}
+</script>
+</body>
+</html>
