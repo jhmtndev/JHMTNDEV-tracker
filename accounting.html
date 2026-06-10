@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JH Mountain — Accounting</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛰️</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green:#1D9E75;--green-light:#E1F5EE;--green-dark:#0F6E56;
+  --blue:#378ADD;--blue-light:#E6F1FB;
+  --amber:#EF9F27;--amber-light:#FAEEDA;
+  --coral:#D85A30;--coral-light:#FAECE7;
+  --ink:#141414;--ink2:#1C1C1C;--muted:#888;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+  --surface:#F8F6F1;--card:#FFFFFF;
+  --font-display:'Bebas Neue',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);background:var(--surface);color:var(--ink);min-height:100vh;font-size:14px}
+
+/* LOGIN */
+.login-screen{position:fixed;inset:0;background:var(--ink);display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:2rem;transition:opacity .4s}
+.login-screen.hidden{opacity:0;pointer-events:none}
+.login-logo{font-family:var(--font-display);font-size:28px;color:#fff;letter-spacing:1px;text-align:center}
+.login-logo span{color:var(--green)}
+.login-sub{font-size:13px;color:#666;font-family:var(--font-mono)}
+.login-box{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:2rem;width:320px}
+.login-label{font-size:11px;font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:#666;margin-bottom:8px;display:block}
+.login-input{width:100%;padding:12px 14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:4px;color:#fff;font-family:var(--font-body);font-size:15px;margin-bottom:1rem}
+.login-input:focus{outline:none;border-color:var(--green)}
+.login-btn{width:100%;padding:12px;background:var(--green);color:#fff;border:none;border-radius:4px;font-family:var(--font-body);font-size:14px;font-weight:500;cursor:pointer}
+.login-error{font-size:12px;color:#E24B4A;font-family:var(--font-mono);margin-top:.5rem;display:none;text-align:center}
+.login-error.show{display:block}
+
+/* APP */
+.app{display:none}
+.app.visible{display:block}
+
+/* HEADER */
+.site-header{background:var(--ink);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:100;border-bottom:2px solid var(--green)}
+.logo{font-family:var(--font-display);font-size:22px;color:#fff;letter-spacing:1px}
+.logo span{color:var(--green)}
+.header-right{display:flex;align-items:center;gap:12px}
+.sync-pill{display:flex;align-items:center;gap:5px;font-size:11px;color:#aaa;font-family:var(--font-mono)}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);transition:background .3s}
+.sync-dot.syncing{background:var(--amber)}
+.sync-dot.error{background:#E24B4A}
+.hbtn{font-size:12px;padding:5px 12px;border-radius:4px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#aaa;cursor:pointer;font-family:var(--font-body);transition:all .15s;text-decoration:none}
+.hbtn:hover{border-color:var(--green);color:#fff}
+
+/* NAV BAR */
+.nav-bar{background:var(--ink2);padding:.5rem 1.5rem;display:flex;gap:1rem;border-bottom:1px solid rgba(255,255,255,.08)}
+.nav-link{font-size:12px;color:#666;text-decoration:none;font-family:var(--font-mono);padding:4px 12px;border-radius:3px;transition:all .15s}
+.nav-link:hover{color:#aaa}
+.nav-link.active{background:var(--green);color:#fff}
+
+/* MAIN */
+.main{max-width:1000px;margin:0 auto;padding:1.5rem 1rem 4rem}
+
+/* STAT CARDS */
+.stat-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1.5rem}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:.875rem 1rem;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.green::before{background:var(--green)}
+.stat-card.blue::before{background:var(--blue)}
+.stat-card.amber::before{background:var(--amber)}
+.stat-card.coral::before{background:var(--coral)}
+.stat-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:4px;font-family:var(--font-mono)}
+.stat-value{font-family:var(--font-display);font-size:28px;line-height:1;color:var(--ink)}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* SECTIONS */
+.section{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:1rem;overflow:hidden}
+.section-header{padding:.875rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.section-header:hover{background:rgba(0,0,0,.02)}
+.section-title{font-size:14px;font-weight:500}
+.section-badge{font-size:12px;font-family:var(--font-mono);color:var(--muted)}
+.section-body{padding:1rem}
+
+/* FORM */
+.form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:8px}
+.form-group{display:flex;flex-direction:column;gap:3px}
+.form-lbl{font-size:10px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.form-input,.form-select{font-size:13px;padding:7px 10px;border:1px solid var(--border2);border-radius:5px;background:var(--surface);color:var(--ink);font-family:var(--font-body)}
+.form-input:focus,.form-select:focus{outline:none;border-color:var(--green)}
+.form-select{cursor:pointer}
+.add-btn{padding:8px 20px;background:var(--green);color:#fff;border:none;border-radius:5px;font-size:13px;font-family:var(--font-body);font-weight:500;cursor:pointer;transition:background .15s}
+.add-btn:hover{background:#1D9E75cc}
+.add-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;margin-top:.5rem}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:8px 10px;border-bottom:2px solid var(--border);font-weight:500}
+td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:hover td{background:rgba(0,0,0,.015)}
+.amt{font-family:var(--font-mono);font-weight:500;color:var(--coral)}
+.amt.credit{color:var(--green)}
+.cat-badge{font-size:10px;padding:2px 8px;border-radius:3px;font-family:var(--font-mono);font-weight:500;white-space:nowrap}
+.receipt-yes{color:var(--green);font-weight:500}
+.receipt-no{color:var(--muted)}
+.del-btn{font-size:11px;color:var(--muted);background:transparent;border:1px solid var(--border);border-radius:3px;padding:2px 8px;cursor:pointer;font-family:var(--font-body)}
+.del-btn:hover{color:var(--coral);border-color:var(--coral)}
+.deal-filter{display:flex;gap:6px;align-items:center}
+.deal-tab{font-size:11px;padding:4px 12px;border-radius:3px;border:1px solid var(--border2);background:transparent;cursor:pointer;font-family:var(--font-mono);color:var(--muted);transition:all .15s}
+.deal-tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+.deal-tab:hover:not(.active){border-color:var(--ink);color:var(--ink)}
+
+/* CATEGORY BREAKDOWN */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px}
+.cat-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:.75rem;display:flex;justify-content:space-between;align-items:center}
+.cat-name{font-size:12px;font-weight:500}
+.cat-amt{font-family:var(--font-mono);font-size:13px;font-weight:500}
+
+/* INVESTOR TABLE */
+.inv-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);align-items:center}
+.inv-row:last-child{border-bottom:none}
+.inv-row.header{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:2px solid var(--border);font-weight:500}
+.inv-name{font-weight:500;font-size:13px}
+.inv-amt{font-family:var(--font-mono);font-size:13px}
+.inv-status{font-size:11px;padding:2px 8px;border-radius:3px;font-family:var(--font-mono);display:inline-block}
+.inv-status.outstanding{background:#FFF3CD;color:#856404}
+.inv-status.paid{background:var(--green-light);color:var(--green-dark)}
+
+/* DEAL SUMMARY */
+.deal-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.ds-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;position:relative;overflow:hidden}
+.ds-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.ds-card.green::before{background:var(--green)}
+.ds-card.amber::before{background:var(--amber)}
+.ds-card.blue::before{background:var(--blue)}
+.ds-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:var(--font-mono);margin-bottom:4px}
+.ds-value{font-family:var(--font-display);font-size:26px}
+.ds-sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+@media(max-width:600px){
+  .form-row{grid-template-columns:1fr}
+  .inv-row{grid-template-columns:1fr 1fr}
+  .stat-value{font-size:22px}
+  .ds-value{font-size:20px}
+}
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="login-screen">
+  <div class="login-logo">JH <span>Mountain</span> Development<br><small style="font-size:.5em;color:#444;font-family:'DM Sans',sans-serif;font-weight:300;letter-spacing:0">Accounting</small></div>
+  <div class="login-sub">Team access only</div>
+  <div class="login-box">
+    <label class="login-label">Password</label>
+    <input class="login-input" type="password" id="login-pw" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Enter</button>
+    <div class="login-error" id="login-error">Incorrect password</div>
+  </div>
+</div>
+
+<div class="app" id="app">
+
+<header class="site-header">
+  <div class="logo">JH <span>Mountain</span> Development</div>
+  <div class="header-right">
+    <div class="sync-pill"><div class="sync-dot" id="sync-dot"></div><span id="sync-text">Loading...</span></div>
+    <a href="/dashboard.html" class="hbtn">← Dashboard</a>
+    <button class="hbtn" onclick="doLogout()">Lock</button>
+  </div>
+</header>
+
+<nav class="nav-bar">
+  <a href="/dashboard.html" class="nav-link">Operations</a>
+  <a href="/accounting.html" class="nav-link active">Accounting</a>
+</nav>
+
+<main class="main">
+
+  <!-- DEAL SELECTOR -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+    <div class="deal-filter">
+      <span style="font-size:11px;color:var(--muted);font-family:var(--font-mono)">DEAL:</span>
+      <button class="deal-tab active" onclick="setDeal('deal1')" id="dt-deal1">Deal #1 — 67 Vista</button>
+      <button class="deal-tab" onclick="setDeal('deal2')" id="dt-deal2">Deal #2</button>
+      <button class="deal-tab" onclick="setDeal('all')" id="dt-all">All Deals</button>
+    </div>
+  </div>
+
+  <!-- STAT STRIP -->
+  <div class="stat-strip">
+    <div class="stat-card green"><div class="stat-label">Total Spent</div><div class="stat-value" id="s-spent">$0</div><div class="stat-sub" id="s-entries">0 entries</div></div>
+    <div class="stat-card amber"><div class="stat-label">Breakeven</div><div class="stat-value" id="s-breakeven">$218,400</div><div class="stat-sub">incl. investor payoff</div></div>
+    <div class="stat-card blue"><div class="stat-label">List Price</div><div class="stat-value" id="s-list">$249,500</div><div class="stat-sub">conservative target</div></div>
+    <div class="stat-card coral"><div class="stat-label">Projected Profit</div><div class="stat-value" id="s-profit">$0</div><div class="stat-sub" id="s-profit-sub">above breakeven</div></div>
+  </div>
+
+  <!-- ADD ENTRY -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection('add-form')">
+      <div class="section-title">+ Add Ledger Entry</div>
+    </div>
+    <div class="section-body" id="add-form">
+      <div class="form-row">
+        <div class="form-group"><label class="form-lbl">Date</label><input class="form-input" type="date" id="f-date"></div>
+        <div class="form-group"><label class="form-lbl">Item</label><input class="form-input" type="text" id="f-item" placeholder="e.g. Down payment — land"></div>
+        <div class="form-group"><label class="form-lbl">Amount ($)</label><input class="form-input" type="number" id="f-amount" placeholder="0" min="0" step="0.01"></div>
+        <div class="form-group"><label class="form-lbl">Category</label>
+          <select class="form-select" id="f-cat">
+            <option value="land">Land</option>
+            <option value="site_prep">Site Prep / Grading</option>
+            <option value="septic">Septic</option>
+            <option value="well">Well</option>
+            <option value="unit">Manufactured Unit</option>
+            <option value="electrical">Electrical</option>
+            <option value="plumbing">Plumbing</option>
+            <option value="hvac">HVAC</option>
+            <option value="sub_work">Sub Work / Labor</option>
+            <option value="materials">Materials / Supplies</option>
+            <option value="permits">Permits / Fees</option>
+            <option value="insurance">Insurance</option>
+            <option value="tax">Tax / Legal</option>
+            <option value="closing">Closing Costs</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-lbl">Deal</label>
+          <select class="form-select" id="f-deal">
+            <option value="deal1">Deal #1 — 67 Vista</option>
+            <option value="deal2">Deal #2</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-lbl">Notes</label><input class="form-input" type="text" id="f-notes" placeholder="Optional notes..."></div>
+        <div class="form-group"><label class="form-lbl">Receipt on file?</label>
+          <select class="form-select" id="f-receipt">
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+        <div class="form-group" style="justify-content:flex-end"><button class="add-btn" id="add-btn" onclick="addEntry()">Add Entry</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEDGER TABLE -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Ledger</div>
+      <div class="section-badge" id="ledger-count">0 entries</div>
+    </div>
+    <div class="section-body" style="padding:0">
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Date</th><th>Item</th><th>Amount</th><th>Category</th><th>Deal</th><th>Receipt</th><th>Notes</th><th></th></tr></thead>
+          <tbody id="ledger-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATEGORY BREAKDOWN -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Spend by Category</div>
+    </div>
+    <div class="section-body">
+      <div class="cat-grid" id="cat-grid"></div>
+    </div>
+  </div>
+
+  <!-- INVESTOR TRACKING -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection('inv-body')">
+      <div class="section-title">Investor Loans</div>
+      <div class="section-badge" id="inv-total">$0 outstanding</div>
+    </div>
+    <div class="section-body" id="inv-body">
+      <div class="inv-row header"><div>Investor</div><div>Principal</div><div>Payoff (12% flat)</div><div>Status</div></div>
+      <div id="inv-rows"></div>
+      <div style="margin-top:1rem;border-top:2px solid var(--border);padding-top:.75rem">
+        <div style="font-size:11px;font-family:var(--font-mono);color:var(--muted);margin-bottom:6px">ADD / EDIT INVESTOR LOAN</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-lbl">Name</label><input class="form-input" type="text" id="inv-name" placeholder="e.g. Frank Seaman"></div>
+          <div class="form-group"><label class="form-lbl">Principal ($)</label><input class="form-input" type="number" id="inv-principal" placeholder="0" min="0"></div>
+          <div class="form-group"><label class="form-lbl">Deal</label>
+            <select class="form-select" id="inv-deal"><option value="deal1">Deal #1</option><option value="deal2">Deal #2</option></select>
+          </div>
+          <div class="form-group" style="justify-content:flex-end"><button class="add-btn" onclick="addInvestor()">Add Loan</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEAL SUMMARY -->
+  <div class="section">
+    <div class="section-header"><div class="section-title">Deal Summary</div></div>
+    <div class="section-body">
+      <div class="deal-summary" id="deal-summary"></div>
+    </div>
+  </div>
+
+</main>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+const PASSWORD='Porsche911';
+const FIREBASE_CONFIG={
+  apiKey:"AIzaSyB4kTOOoAWja67qyVhSpaArSOW-25UhgtU",
+  authDomain:"jhmtndev-dashboard.firebaseapp.com",
+  databaseURL:"https://jhmtndev-dashboard-default-rtdb.firebaseio.com",
+  projectId:"jhmtndev-dashboard",
+  storageBucket:"jhmtndev-dashboard.firebasestorage.app",
+  messagingSenderId:"1072891591745",
+  appId:"1:1072891591745:web:28030309bc57ce74c0dac0"
+};
+
+const CAT_LABELS={land:'Land',site_prep:'Site Prep',septic:'Septic',well:'Well',unit:'Mfg Unit',electrical:'Electrical',plumbing:'Plumbing',hvac:'HVAC',sub_work:'Sub Work',materials:'Materials',permits:'Permits/Fees',insurance:'Insurance',tax:'Tax/Legal',closing:'Closing',other:'Other'};
+const CAT_COLORS={land:'#1D6B4E',site_prep:'#854F0B',septic:'#854F0B',well:'#185FA5',unit:'#993C1D',electrical:'#C8860A',plumbing:'#185FA5',hvac:'#534AB7',sub_work:'#993C1D',materials:'#666',permits:'#666',insurance:'#666',tax:'#666',closing:'#993C1D',other:'#888'};
+
+let db,ledgerRef,investorRef;
+let ledgerData={},investorData={};
+let currentDeal='deal1';
+
+// LOGIN
+function doLogin(){
+  if(document.getElementById('login-pw').value===PASSWORD){
+    sessionStorage.setItem('jhm_auth','1');
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('app').classList.add('visible');
+    initApp();
+    setTimeout(()=>document.getElementById('login-screen').remove(),500);
+  } else {
+    document.getElementById('login-error').classList.add('show');
+    document.getElementById('login-pw').value='';
+  }
+}
+function doLogout(){sessionStorage.removeItem('jhm_auth');location.reload();}
+if(sessionStorage.getItem('jhm_auth')==='1'){
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('app').classList.add('visible');
+  setTimeout(()=>document.getElementById('login-screen').remove(),10);
+  window.addEventListener('DOMContentLoaded',initApp);
+}
+
+function initApp(){
+  firebase.initializeApp(FIREBASE_CONFIG);
+  db=firebase.database();
+  ledgerRef=db.ref('jhm/accounting/ledger');
+  investorRef=db.ref('jhm/accounting/investors');
+  setStatus('syncing','Connecting...');
+
+  ledgerRef.on('value',snap=>{
+    ledgerData=snap.val()||{};
+    renderAll();
+    setStatus('ok','Live');
+  });
+  investorRef.on('value',snap=>{
+    investorData=snap.val()||{};
+    renderInvestors();
+    renderStats();
+  });
+
+  // Default date to today
+  document.getElementById('f-date').valueAsDate=new Date();
+}
+
+function setStatus(t,text){
+  const d=document.getElementById('sync-dot'),s=document.getElementById('sync-text');
+  if(d)d.className='sync-dot'+(t==='syncing'?' syncing':t==='error'?' error':'');
+  if(s)s.textContent=text;
+}
+
+// DEAL FILTER
+function setDeal(d){
+  currentDeal=d;
+  document.querySelectorAll('.deal-tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('dt-'+d).classList.add('active');
+  renderAll();
+}
+
+// ADD ENTRY
+function addEntry(){
+  const date=document.getElementById('f-date').value;
+  const item=document.getElementById('f-item').value.trim();
+  const amount=parseFloat(document.getElementById('f-amount').value);
+  const cat=document.getElementById('f-cat').value;
+  const deal=document.getElementById('f-deal').value;
+  const notes=document.getElementById('f-notes').value.trim();
+  const receipt=document.getElementById('f-receipt').value;
+  if(!date||!item||isNaN(amount)||amount<=0){alert('Fill in date, item, and amount.');return;}
+  const key=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  ledgerRef.child(key).set({date,item,amount,cat,deal,notes,receipt,created:Date.now()});
+  document.getElementById('f-item').value='';
+  document.getElementById('f-amount').value='';
+  document.getElementById('f-notes').value='';
+}
+
+function deleteEntry(key){
+  if(!confirm('Delete this ledger entry?'))return;
+  ledgerRef.child(key).remove();
+}
+
+// ADD INVESTOR
+function addInvestor(){
+  const name=document.getElementById('inv-name').value.trim();
+  const principal=parseFloat(document.getElementById('inv-principal').value);
+  const deal=document.getElementById('inv-deal').value;
+  if(!name||isNaN(principal)||principal<=0){alert('Fill in name and principal.');return;}
+  const key=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const payoff=Math.round(principal*1.12*100)/100;
+  investorRef.child(key).set({name,principal,payoff,deal,status:'outstanding',created:Date.now()});
+  document.getElementById('inv-name').value='';
+  document.getElementById('inv-principal').value='';
+}
+
+function toggleInvStatus(key){
+  const current=investorData[key]&&investorData[key].status||'outstanding';
+  investorRef.child(key).update({status:current==='outstanding'?'paid':'outstanding'});
+}
+
+function deleteInvestor(key){
+  if(!confirm('Delete this investor loan?'))return;
+  investorRef.child(key).remove();
+}
+
+// RENDER
+function renderAll(){
+  renderLedger();
+  renderCategories();
+  renderStats();
+  renderDealSummary();
+}
+
+function getFilteredEntries(){
+  return Object.entries(ledgerData).filter(([k,v])=>currentDeal==='all'||v.deal===currentDeal).sort((a,b)=>(a[1].date||'').localeCompare(b[1].date||''));
+}
+
+function renderLedger(){
+  const entries=getFilteredEntries();
+  const tbody=document.getElementById('ledger-body');
+  document.getElementById('ledger-count').textContent=entries.length+' entries';
+  if(!entries.length){tbody.innerHTML='<tr><td colspan="8" style="color:var(--muted);text-align:center;padding:2rem">No entries yet — add one above</td></tr>';return;}
+  tbody.innerHTML=entries.map(([key,e])=>{
+    const c=CAT_COLORS[e.cat]||'#888';
+    return`<tr>
+      <td style="white-space:nowrap;font-family:var(--font-mono);font-size:12px">${e.date||''}</td>
+      <td>${e.item||''}</td>
+      <td class="amt">$${Number(e.amount||0).toLocaleString('en-US',{minimumFractionDigits:2})}</td>
+      <td><span class="cat-badge" style="background:${c}18;color:${c}">${CAT_LABELS[e.cat]||e.cat}</span></td>
+      <td style="font-size:11px;font-family:var(--font-mono)">${e.deal==='deal1'?'#1':'#2'}</td>
+      <td>${e.receipt==='yes'?'<span class="receipt-yes">✓</span>':'<span class="receipt-no">—</span>'}</td>
+      <td style="font-size:12px;color:var(--muted)">${e.notes||''}</td>
+      <td><button class="del-btn" onclick="deleteEntry('${key}')">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderCategories(){
+  const entries=getFilteredEntries();
+  const cats={};
+  entries.forEach(([k,e])=>{
+    const c=e.cat||'other';
+    cats[c]=(cats[c]||0)+(e.amount||0);
+  });
+  const sorted=Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+  const grid=document.getElementById('cat-grid');
+  if(!sorted.length){grid.innerHTML='<div style="color:var(--muted);font-size:13px;font-style:italic">No entries for this deal yet</div>';return;}
+  grid.innerHTML=sorted.map(([cat,amt])=>{
+    const c=CAT_COLORS[cat]||'#888';
+    return`<div class="cat-card"><span class="cat-name" style="color:${c}">${CAT_LABELS[cat]||cat}</span><span class="cat-amt" style="color:${c}">$${Math.round(amt).toLocaleString()}</span></div>`;
+  }).join('');
+}
+
+function renderInvestors(){
+  const rows=document.getElementById('inv-rows');
+  const entries=Object.entries(investorData).filter(([k,v])=>currentDeal==='all'||v.deal===currentDeal);
+  if(!entries.length){rows.innerHTML='<div style="color:var(--muted);font-size:13px;font-style:italic;padding:.5rem 0">No investor loans recorded for this deal</div>';document.getElementById('inv-total').textContent='$0 outstanding';return;}
+  let totalOut=0;
+  rows.innerHTML=entries.map(([key,inv])=>{
+    if(inv.status==='outstanding')totalOut+=inv.payoff||0;
+    return`<div class="inv-row">
+      <div class="inv-name">${inv.name}</div>
+      <div class="inv-amt">$${Number(inv.principal||0).toLocaleString()}</div>
+      <div class="inv-amt">$${Number(inv.payoff||0).toLocaleString()}</div>
+      <div>
+        <span class="inv-status ${inv.status}" onclick="toggleInvStatus('${key}')" style="cursor:pointer">${inv.status==='outstanding'?'Outstanding':'Paid ✓'}</span>
+        <button class="del-btn" style="margin-left:6px" onclick="deleteInvestor('${key}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('inv-total').textContent='$'+Math.round(totalOut).toLocaleString()+' outstanding';
+}
+
+function renderStats(){
+  const entries=getFilteredEntries();
+  const totalSpent=entries.reduce((s,[k,e])=>s+(e.amount||0),0);
+  const invEntries=Object.entries(investorData).filter(([k,v])=>currentDeal==='all'||v.deal===currentDeal);
+  const totalPayoff=invEntries.reduce((s,[k,v])=>s+(v.status==='outstanding'?v.payoff||0:0),0);
+  const breakeven=totalSpent+totalPayoff;
+  const listPrice=currentDeal==='deal1'?249500:249500;
+  const profit=listPrice-breakeven;
+
+  document.getElementById('s-spent').textContent='$'+Math.round(totalSpent).toLocaleString();
+  document.getElementById('s-entries').textContent=entries.length+' entries';
+  document.getElementById('s-breakeven').textContent='$'+Math.round(breakeven).toLocaleString();
+  document.getElementById('s-list').textContent='$'+listPrice.toLocaleString();
+  document.getElementById('s-profit').textContent=(profit>=0?'$':'-$')+Math.abs(Math.round(profit)).toLocaleString();
+  document.getElementById('s-profit-sub').textContent=profit>=0?'projected profit':'over breakeven';
+}
+
+function renderDealSummary(){
+  const deals=['deal1','deal2'];
+  const container=document.getElementById('deal-summary');
+  container.innerHTML=deals.map(d=>{
+    const entries=Object.entries(ledgerData).filter(([k,v])=>v.deal===d);
+    const spent=entries.reduce((s,[k,e])=>s+(e.amount||0),0);
+    const invs=Object.entries(investorData).filter(([k,v])=>v.deal===d);
+    const payoff=invs.reduce((s,[k,v])=>s+(v.status==='outstanding'?v.payoff||0:0),0);
+    const be=spent+payoff;
+    const list=249500;
+    const profit=list-be;
+    const label=d==='deal1'?'Deal #1 — 67 Vista':'Deal #2';
+    return`<div class="ds-card ${profit>=0?'green':'coral'}">
+      <div class="ds-label">${label}</div>
+      <div class="ds-value" style="font-size:20px;color:${profit>=0?'var(--green)':'var(--coral)'}">$${Math.round(spent).toLocaleString()} spent</div>
+      <div class="ds-sub">Breakeven: $${Math.round(be).toLocaleString()} · Profit: ${profit>=0?'$':'-$'}${Math.abs(Math.round(profit)).toLocaleString()}</div>
+      <div class="ds-sub">${entries.length} entries · ${invs.length} investor loans</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleSection(id){
+  const el=document.getElementById(id);
+  el.style.display=el.style.display==='none'?'block':'block';
+}
+</script>
+</body>
+</html>
