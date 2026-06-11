@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JH Mountain — Ledger Upload</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#141414;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2rem;padding:2rem}
+h1{font-size:24px;font-weight:500}
+h1 span{color:#1D9E75}
+p{color:#888;font-size:14px;max-width:500px;text-align:center;line-height:1.6}
+.card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:2rem;max-width:600px;width:100%}
+table{width:100%;border-collapse:collapse;font-size:12px;margin:1rem 0}
+th{text-align:left;color:#888;font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.15)}
+td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.06);color:#ccc}
+.amt{color:#D85A30;font-family:monospace}
+.btn{width:100%;padding:14px;background:#1D9E75;color:#fff;border:none;border-radius:6px;font-size:16px;font-weight:500;cursor:pointer;margin-top:1rem;transition:background .2s}
+.btn:hover{background:#2AB882}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.done{background:#378ADD}
+.status{text-align:center;font-size:14px;margin-top:1rem;color:#1D9E75}
+.status.error{color:#E24B4A}
+.warning{background:rgba(200,134,10,.1);border:1px solid rgba(200,134,10,.3);border-radius:6px;padding:1rem;font-size:13px;color:#C8860A;margin-bottom:1rem;line-height:1.5}
+.inv-section{margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,.1)}
+.inv-title{font-size:13px;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem}
+</style>
+</head>
+<body>
+
+<h1>JH <span>Mountain</span> — Ledger Upload</h1>
+<p>This will upload all 67 Vista Drive (Deal #1) ledger entries and investor loans into your accounting dashboard. One click — all data loaded.</p>
+
+<div class="card">
+  <div class="warning">⚠ Only run this once. If you've already uploaded, running again will create duplicate entries. If that happens, delete the duplicates from the accounting page.</div>
+  
+  <h3 style="font-size:14px;margin-bottom:.5rem">Ledger Entries — Deal #1 (67 Vista Drive)</h3>
+  <table>
+    <thead><tr><th>Date</th><th>Item</th><th>Amount</th><th>Category</th></tr></thead>
+    <tbody>
+      <tr><td>2025-09-05</td><td>Down payment — land</td><td class="amt">$1,100.00</td><td>Land</td></tr>
+      <tr><td>2025-11-05</td><td>Land purchase (close + escrow)</td><td class="amt">$23,521.99</td><td>Land</td></tr>
+      <tr><td>2025-12-08</td><td>Seed / straw — site prep</td><td class="amt">$1,650.00</td><td>Site Prep</td></tr>
+      <tr><td>2025-12-16</td><td>Down payment — Clayton Homes</td><td class="amt">$40,020.00</td><td>Mfg Unit</td></tr>
+      <tr><td>2025-12-17</td><td>Lot preparation + septic installation</td><td class="amt">$24,520.00</td><td>Septic</td></tr>
+      <tr><td>2026-02-20</td><td>Sub work</td><td class="amt">$4,825.00</td><td>Sub Work</td></tr>
+      <tr><td>2026-03-16</td><td>Final escrow — Clayton Homes (unit balance)</td><td class="amt">$79,498.82</td><td>Mfg Unit</td></tr>
+      <tr><td>2026-03-16</td><td>Tax prep</td><td class="amt">$518.00</td><td>Tax / Legal</td></tr>
+      <tr><td>2026-03-25</td><td>Plumbing supplies</td><td class="amt">$885.33</td><td>Plumbing</td></tr>
+      <tr><td>2026-03-31</td><td>Insurance</td><td class="amt">$138.01</td><td>Insurance</td></tr>
+      <tr><td>2026-04-11</td><td>Electrical (Hank's Electric)</td><td class="amt">$349.17</td><td>Electrical</td></tr>
+      <tr><td>2026-04-13</td><td>Well drilling (Clear Water)</td><td class="amt">$9,971.00</td><td>Well</td></tr>
+      <tr><td>2026-04-14</td><td>Electrical (Hank's Electric)</td><td class="amt">$101.40</td><td>Electrical</td></tr>
+    </tbody>
+  </table>
+  <div style="text-align:right;font-size:13px;color:#1D9E75;font-family:monospace;font-weight:500">Total: $187,098.72</div>
+
+  <div class="inv-section">
+    <div class="inv-title">Investor Loans — Deal #1</div>
+    <table>
+      <thead><tr><th>Investor</th><th>Principal</th><th>Payoff (12%)</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Frank Seaman</td><td class="amt">$2,750.00</td><td class="amt">$3,080.00</td><td>Down payment + seed/straw</td></tr>
+        <tr><td>Kyle Black</td><td class="amt">$23,521.99</td><td class="amt">$26,344.63</td><td>Land purchase</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <button class="btn" id="upload-btn" onclick="uploadAll()">Upload All Entries to Firebase</button>
+  <div class="status" id="status"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyB4kTOOoAWja67qyVhSpaArSOW-25UhgtU",
+  authDomain:"jhmtndev-dashboard.firebaseapp.com",
+  databaseURL:"https://jhmtndev-dashboard-default-rtdb.firebaseio.com",
+  projectId:"jhmtndev-dashboard",
+  storageBucket:"jhmtndev-dashboard.firebasestorage.app",
+  messagingSenderId:"1072891591745",
+  appId:"1:1072891591745:web:28030309bc57ce74c0dac0"
+});
+const db = firebase.database();
+
+const LEDGER_ENTRIES = [
+  { date:"2025-09-05", item:"Down payment — land", amount:1100.00, cat:"land", deal:"deal1", notes:"Investment loan, Frank Seaman", receipt:"yes" },
+  { date:"2025-11-05", item:"Land purchase (close + escrow)", amount:23521.99, cat:"land", deal:"deal1", notes:"Investment loan, Kyle Black", receipt:"yes" },
+  { date:"2025-12-08", item:"Seed / straw — site prep", amount:1650.00, cat:"site_prep", deal:"deal1", notes:"Investment loan, Frank Seaman", receipt:"yes" },
+  { date:"2025-12-16", item:"Down payment — Clayton Homes", amount:40020.00, cat:"unit", deal:"deal1", notes:"Escrow payment, wire fees", receipt:"yes" },
+  { date:"2025-12-17", item:"Lot preparation + septic installation", amount:24520.00, cat:"septic", deal:"deal1", notes:"", receipt:"yes" },
+  { date:"2026-02-20", item:"Sub work", amount:4825.00, cat:"sub_work", deal:"deal1", notes:"Paid on CC invoice", receipt:"yes" },
+  { date:"2026-03-16", item:"Final escrow — Clayton Homes (unit balance)", amount:79498.82, cat:"unit", deal:"deal1", notes:"Balance owed to Clayton Homes", receipt:"yes" },
+  { date:"2026-03-16", item:"Tax prep", amount:518.00, cat:"tax", deal:"deal1", notes:"TurboTax", receipt:"yes" },
+  { date:"2026-03-25", item:"Plumbing supplies", amount:885.33, cat:"plumbing", deal:"deal1", notes:"Pipe supplies", receipt:"yes" },
+  { date:"2026-03-31", item:"Insurance", amount:138.01, cat:"insurance", deal:"deal1", notes:"One Insurance", receipt:"yes" },
+  { date:"2026-04-11", item:"Electrical (Hank's Electric)", amount:349.17, cat:"electrical", deal:"deal1", notes:"", receipt:"yes" },
+  { date:"2026-04-13", item:"Well drilling (Clear Water)", amount:9971.00, cat:"well", deal:"deal1", notes:"Clear Water Well Drilling", receipt:"yes" },
+  { date:"2026-04-14", item:"Electrical (Hank's Electric)", amount:101.40, cat:"electrical", deal:"deal1", notes:"", receipt:"yes" },
+];
+
+const INVESTORS = [
+  { name:"Frank Seaman", principal:2750.00, payoff:3080.00, deal:"deal1", status:"outstanding" },
+  { name:"Kyle Black", principal:23521.99, payoff:26344.63, deal:"deal1", status:"outstanding" },
+];
+
+async function uploadAll() {
+  const btn = document.getElementById('upload-btn');
+  const status = document.getElementById('status');
+  btn.disabled = true;
+  btn.textContent = 'Uploading...';
+  status.textContent = '';
+  status.className = 'status';
+
+  try {
+    // Upload ledger entries
+    const ledgerRef = db.ref('jhm/accounting/ledger');
+    for (let i = 0; i < LEDGER_ENTRIES.length; i++) {
+      const entry = LEDGER_ENTRIES[i];
+      const key = Date.now().toString(36) + Math.random().toString(36).slice(2,6) + i;
+      await ledgerRef.child(key).set({ ...entry, created: Date.now() + i });
+      status.textContent = `Uploading ledger entry ${i+1} of ${LEDGER_ENTRIES.length}...`;
+    }
+
+    // Upload investor loans
+    const invRef = db.ref('jhm/accounting/investors');
+    for (let i = 0; i < INVESTORS.length; i++) {
+      const inv = INVESTORS[i];
+      const key = 'inv_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6) + i;
+      await invRef.child(key).set({ ...inv, created: Date.now() + i });
+      status.textContent = `Uploading investor loan ${i+1} of ${INVESTORS.length}...`;
+    }
+
+    btn.textContent = '✓ Upload Complete';
+    btn.className = 'btn done';
+    status.textContent = `Done — ${LEDGER_ENTRIES.length} ledger entries and ${INVESTORS.length} investor loans uploaded. Go to jhmtndev.com/accounting.html to see them.`;
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Upload All Entries to Firebase';
+    status.textContent = 'Error: ' + e.message;
+    status.className = 'status error';
+    console.error(e);
+  }
+}
+</script>
+</body>
+</html>
