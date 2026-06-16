@@ -117,7 +117,7 @@ tr:hover td{background:rgba(0,0,0,.015)}
 .cat-amt{font-family:var(--font-mono);font-size:13px;font-weight:500}
 
 /* INVESTOR TABLE */
-.inv-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);align-items:center}
+.inv-row{display:grid;grid-template-columns:1.2fr .9fr .5fr .9fr 1fr;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);align-items:center}
 .inv-row:last-child{border-bottom:none}
 .inv-row.header{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:2px solid var(--border);font-weight:500}
 .inv-name{font-weight:500;font-size:13px}
@@ -276,16 +276,20 @@ tr:hover td{background:rgba(0,0,0,.015)}
       <div class="section-badge" id="inv-total">$0 outstanding</div>
     </div>
     <div class="section-body" id="inv-body">
-      <div class="inv-row header"><div>Investor</div><div>Principal</div><div>Payoff (12% flat)</div><div>Status</div></div>
+      <div class="inv-row header"><div>Investor</div><div>Principal</div><div>Rate</div><div>Payoff</div><div>Status</div></div>
       <div id="inv-rows"></div>
       <div style="margin-top:1rem;border-top:2px solid var(--border);padding-top:.75rem">
         <div style="font-size:11px;font-family:var(--font-mono);color:var(--muted);margin-bottom:6px">ADD / EDIT INVESTOR LOAN</div>
         <div class="form-row">
           <div class="form-group"><label class="form-lbl">Name</label><input class="form-input" type="text" id="inv-name" placeholder="e.g. Frank Seaman"></div>
           <div class="form-group"><label class="form-lbl">Principal ($)</label><input class="form-input" type="number" id="inv-principal" placeholder="0" min="0"></div>
+          <div class="form-group"><label class="form-lbl">Interest Rate (%)</label><input class="form-input" type="number" id="inv-rate" placeholder="12" min="0" max="100" step="0.5" value="12"></div>
           <div class="form-group"><label class="form-lbl">Deal</label>
             <select class="form-select" id="inv-deal"><option value="deal1">Deal #1</option><option value="deal2">Deal #2</option></select>
           </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"></div><div class="form-group"></div><div class="form-group"></div>
           <div class="form-group" style="justify-content:flex-end"><button class="add-btn" onclick="addInvestor()">Add Loan</button></div>
         </div>
       </div>
@@ -408,13 +412,15 @@ function deleteEntry(key){
 function addInvestor(){
   const name=document.getElementById('inv-name').value.trim();
   const principal=parseFloat(document.getElementById('inv-principal').value);
+  const rate=parseFloat(document.getElementById('inv-rate').value)||12;
   const deal=document.getElementById('inv-deal').value;
   if(!name||isNaN(principal)||principal<=0){alert('Fill in name and principal.');return;}
   const key=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-  const payoff=Math.round(principal*1.12*100)/100;
-  investorRef.child(key).set({name,principal,payoff,deal,status:'outstanding',created:Date.now()});
+  const payoff=Math.round(principal*(1+rate/100)*100)/100;
+  investorRef.child(key).set({name,principal,payoff,rate,deal,status:'outstanding',created:Date.now()});
   document.getElementById('inv-name').value='';
   document.getElementById('inv-principal').value='';
+  document.getElementById('inv-rate').value='12';
 }
 
 function toggleInvStatus(key){
@@ -482,9 +488,11 @@ function renderInvestors(){
   let totalOut=0;
   rows.innerHTML=entries.map(([key,inv])=>{
     if(inv.status==='outstanding')totalOut+=inv.payoff||0;
+    const rate=inv.rate!==undefined?inv.rate:12;
     return`<div class="inv-row">
       <div class="inv-name">${inv.name}</div>
       <div class="inv-amt">$${Number(inv.principal||0).toLocaleString()}</div>
+      <div class="inv-amt" style="color:var(--amber)">${rate}%</div>
       <div class="inv-amt">$${Number(inv.payoff||0).toLocaleString()}</div>
       <div>
         <span class="inv-status ${inv.status}" onclick="toggleInvStatus('${key}')" style="cursor:pointer">${inv.status==='outstanding'?'Outstanding':'Paid ✓'}</span>

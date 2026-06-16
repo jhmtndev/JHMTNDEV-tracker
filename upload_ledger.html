@@ -58,10 +58,10 @@ td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.06);color:#ccc}
   <div class="inv-section">
     <div class="inv-title">Investor Loans — Deal #1</div>
     <table>
-      <thead><tr><th>Investor</th><th>Principal</th><th>Payoff (12%)</th><th>Notes</th></tr></thead>
+      <thead><tr><th>Investor</th><th>Principal</th><th>Rate</th><th>Payoff</th><th>Notes</th></tr></thead>
       <tbody>
-        <tr><td>Frank Seaman</td><td class="amt">$2,750.00</td><td class="amt">$3,080.00</td><td>Down payment + seed/straw</td></tr>
-        <tr><td>Kyle Black</td><td class="amt">$23,521.99</td><td class="amt">$26,344.63</td><td>Land purchase</td></tr>
+        <tr><td>Frank Seaman</td><td class="amt">$2,750.00</td><td>12%</td><td class="amt">$3,080.00</td><td>Down payment + seed/straw</td></tr>
+        <tr><td>Kyle Black</td><td class="amt">$23,521.99</td><td>12%</td><td class="amt">$26,344.63</td><td>Land purchase</td></tr>
       </tbody>
     </table>
   </div>
@@ -101,8 +101,8 @@ const LEDGER_ENTRIES = [
 ];
 
 const INVESTORS = [
-  { name:"Frank Seaman", principal:2750.00, payoff:3080.00, deal:"deal1", status:"outstanding" },
-  { name:"Kyle Black", principal:23521.99, payoff:26344.63, deal:"deal1", status:"outstanding" },
+  { name:"Frank Seaman", principal:2750.00, payoff:3080.00, rate:12, deal:"deal1", status:"outstanding" },
+  { name:"Kyle Black", principal:23521.99, payoff:26344.63, rate:12, deal:"deal1", status:"outstanding" },
 ];
 
 async function uploadAll() {
