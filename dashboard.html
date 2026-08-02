@@ -236,10 +236,11 @@ body{font-family:var(--font-body);background:var(--surface);color:var(--ink);min
 </header>
 
 <main class="main">
+  <div style="font-family:var(--font-display);font-size:26px;letter-spacing:.5px;margin-bottom:.75rem">69 Vista <span style="font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:.05em">— placeholder until address confirmed</span></div>
   <div class="stat-strip" id="stat-strip">
     <div class="stat-card green"><div class="stat-label">Tasks complete</div><div class="stat-value" id="s-done">—</div><div class="stat-sub" id="s-of">of — tasks</div></div>
     <div class="stat-card blue"><div class="stat-label">Budget spent</div><div class="stat-value" id="s-spent">$—</div><div class="stat-sub">entered so far</div></div>
-    <div class="stat-card amber"><div class="stat-label">Target budget</div><div class="stat-value">$192K</div><div class="stat-sub">based on 67 Vista</div></div>
+    <div class="stat-card amber"><div class="stat-label">Target budget</div><div class="stat-value">$185K</div><div class="stat-sub">69 Vista target</div></div>
     <div class="stat-card coral"><div class="stat-label">Remaining</div><div class="stat-value" id="s-remain">$—</div><div class="stat-sub" id="s-remain-sub">to target</div></div>
   </div>
 
@@ -247,7 +248,7 @@ body{font-family:var(--font-body);background:var(--surface);color:var(--ink);min
     <div class="budget-labels">
       <span class="budget-label">$0 spent</span>
       <span class="budget-pct" id="budget-pct">0%</span>
-      <span class="budget-label">$192,000 target</span>
+      <span class="budget-label">$185,000 target</span>
     </div>
     <div class="budget-track"><div class="budget-fill" id="budget-fill" style="width:0%"></div></div>
   </div>
@@ -291,7 +292,7 @@ body{font-family:var(--font-body);background:var(--surface);color:var(--ink);min
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
 const PASSWORD = 'Porsche911';
-const TARGET = 192000;
+const TARGET = 185000;
 
 const OWNER_COLORS = {
   'Hank':{bg:'#E1F5EE',tc:'#0F6E56'},'Will':{bg:'#E6F1FB',tc:'#185FA5'},
