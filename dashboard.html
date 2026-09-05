@@ -142,6 +142,11 @@ body{font-family:var(--font-body);background:var(--surface);color:var(--ink);min
 
 /* ── SECTIONS & TASKS ── */
 .sec-label{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-family:var(--font-mono);margin:12px 0 6px}
+.phase-docs{display:flex;flex-wrap:wrap;gap:6px 14px;padding:.5rem 0 .75rem;border-bottom:1px solid var(--border);margin-bottom:.25rem}
+.phase-docs a{font-size:12px;text-decoration:none;color:#1a73e8;display:inline-flex;align-items:center;gap:4px}
+.phase-docs a:hover{text-decoration:underline}
+.phase-docs a::before{content:"📁";font-size:11px}
+.phase-docs-empty{font-size:12px;color:var(--muted);font-style:italic;padding:.5rem 0 .75rem;border-bottom:1px solid var(--border);margin-bottom:.25rem}
 .task{border-bottom:1px solid var(--border);padding:8px 0}
 .task:last-child{border-bottom:none}
 .task-row1{display:grid;grid-template-columns:18px 1fr;gap:8px;align-items:start}
@@ -303,6 +308,9 @@ const OWNER_COLORS = {
 const PHASES=[
   {id:'p0',label:'Phase 0',title:'Land under contract — pre-close',days:'Days −30 to 0',color:'#1D9E75',light:'#E1F5EE',tc:'#0F6E56',
    note:'Complete everything here before spending a dollar on land. Close day is a trigger, not a starting gun.',
+   docs:[
+     {label:'Phase 0 Documents (Google Drive)', url:'https://drive.google.com/drive/folders/1sQ0QsTM9PkW5eabDSpiTFfFWPNezAPQa'}
+   ],
    sections:[
     {name:'Due diligence & permitting',items:[
       {t:'Land deposit paid — permission to perc test obtained',o:'Owner',d:'Day 1'},
@@ -530,6 +538,9 @@ function render(){
       });
     });
     const spendStr=phSpend>0?'$'+Math.round(phSpend).toLocaleString():'$0';
+    const docsHtml=(ph.docs&&ph.docs.length)
+      ?`<div class="phase-docs">${ph.docs.map(d=>`<a href="${d.url}" target="_blank" rel="noopener">${d.label}</a>`).join('')}</div>`
+      :`<div class="phase-docs-empty">No documents linked yet</div>`;
     card.innerHTML=`
       <div style="background:${ph.color}20;height:3px"><div class="phase-prog-bar" id="bar_${ph.id}" style="width:${pct}%;background:${ph.color}"></div></div>
       <div class="phase-header" onclick="togglePhase('${ph.id}')">
@@ -540,7 +551,7 @@ function render(){
         <i class="chev${isOpen?' open':''}" id="chev_${ph.id}">▾</i>
       </div>
       <div id="body_${ph.id}" style="display:${isOpen?'block':'none'}" class="phase-body">
-        <div class="phase-note">${ph.note}</div>${secHtml}
+        <div class="phase-note">${ph.note}</div>${docsHtml}${secHtml}
       </div>`;
     con.appendChild(card);
   });
