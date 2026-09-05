@@ -216,6 +216,16 @@ section { padding: 6rem 2rem; }
 .phase-pct.done { color: var(--green-light); }
 .phase-pct.active { color: var(--amber); }
 .phase-pct.pending { color: rgba(255,255,255,.25); }
+.phase-docs { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.phase-docs a {
+  font-size: 11px; font-family: var(--font-mono);
+  color: rgba(88,166,255,.9); text-decoration: none;
+  border-bottom: 1px dotted rgba(88,166,255,.4);
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.phase-docs a:hover { color: #fff; border-color: rgba(255,255,255,.5); }
+.phase-docs a::before { content: "📄"; font-size: 10px; }
+.phase-docs-empty { font-size: 11px; color: rgba(255,255,255,.22); font-family: var(--font-mono); margin-top: 6px; font-style: italic; }
 
 .live-right {}
 .budget-card {
@@ -503,6 +513,10 @@ footer {
     <div class="section-label">Active Build</div>
     <h2 class="section-h2">Live Project Status</h2>
     <p class="section-sub">Real-time progress on our current build — updated by our team on the ground as each phase completes.</p>
+    <div class="live-meta" style="display:flex;gap:2rem;flex-wrap:wrap;margin:0 0 1.5rem;font-size:13px;color:rgba(255,255,255,.5);letter-spacing:.02em">
+      <span><strong style="color:rgba(255,255,255,.85)">Parcel #</strong> 173000488976</span>
+      <span><strong style="color:rgba(255,255,255,.85)">Groundbreaking</strong> September 21, 2026</span>
+    </div>
     <div class="live-grid fade-up">
       <div class="live-left">
         <div class="phase-track" id="phase-track">
@@ -727,25 +741,27 @@ const FIREBASE_CONFIG = {
 };
 
 const TARGET = 185000;
-const PROJECT_START = new Date('2026-09-15'); // Day 0 = land close (69 Vista)
+const PROJECT_START = new Date('2026-09-30'); // Day 0 = tentative, subject to move earlier
 const PROJECT_DAYS = 100;
 
 const PHASES = [
   { id:'p0', label:'Phase 0', desc:'Land under contract — pre-close', color:'#1D9E75', sections:[
     {items:16}
+  ], docs:[
+    {label:'Phase 0 Documents (Google Drive)', url:'https://drive.google.com/drive/folders/1sQ0QsTM9PkW5eabDSpiTFfFWPNezAPQa'}
   ]},
   { id:'p1', label:'Phase 1', desc:'Land close & horizontal construction', color:'#378ADD', sections:[
     {items:5},{items:9}
-  ]},
+  ], docs:[]},
   { id:'p2', label:'Phase 2', desc:'Unit delivery & set', color:'#EF9F27', sections:[
     {items:5}
-  ]},
+  ], docs:[]},
   { id:'p3', label:'Phase 3', desc:'Sub work — utilities & finish', color:'#D85A30', sections:[
     {items:4},{items:2},{items:2},{items:1},{items:5}
-  ]},
+  ], docs:[]},
   { id:'p4', label:'Phase 4', desc:'Inspections, punch-out & list', color:'#639922', sections:[
     {items:2},{items:3},{items:4},{items:2}
-  ]},
+  ], docs:[]},
 ];
 
 function getTaskCounts() {
@@ -796,11 +812,15 @@ function renderLiveStatus(data) {
     let status = 'done';
     if (ph.pct < 100 && !currentFound) { status = 'active'; currentFound = true; }
     else if (ph.pct < 100) status = 'pending';
+    const docsHtml = (ph.docs && ph.docs.length)
+      ? `<div class="phase-docs">${ph.docs.map(d => `<a href="${d.url}" target="_blank" rel="noopener">${d.label}</a>`).join('')}</div>`
+      : `<div class="phase-docs-empty">No documents linked yet</div>`;
     return `<div class="phase-item">
       <div class="phase-dot ${status}"></div>
       <div class="phase-info">
         <div class="phase-name">${ph.label} — ${ph.desc}</div>
         <div class="phase-desc">${ph.done} of ${ph.total} tasks complete</div>
+        ${docsHtml}
       </div>
       <div class="phase-pct ${status}">${ph.pct}%</div>
     </div>`;
