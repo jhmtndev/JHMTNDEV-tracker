@@ -199,6 +199,7 @@ section { padding: 6rem 2rem; }
   margin-bottom: .4rem;
 }
 .meta-value { font-size: 15px; font-weight: 500; color: rgba(255,255,255,.92); }
+.meta-value.funded { color: var(--green-light); font-weight: 700; }
 
 .live-grid {
   display: grid;
@@ -531,6 +532,10 @@ footer {
         <div class="meta-label">Groundbreaking</div>
         <div class="meta-value">September 30, 2026</div>
       </div>
+      <div class="meta-item">
+        <div class="meta-label">Funding Status</div>
+        <div class="meta-value funded">100%</div>
+      </div>
     </div>
     <div class="live-grid fade-up">
       <div class="live-left">
@@ -541,12 +546,12 @@ footer {
       </div>
       <div class="live-right">
         <div class="budget-card">
-          <div class="budget-card-label">Funding Status</div>
-          <div class="budget-status on-track">100%</div>
+          <div class="budget-card-label">Budget Status</div>
+          <div class="budget-status on-track" id="budget-status">On Track</div>
           <div class="budget-bar-bg">
-            <div class="budget-bar-fill" style="width:100%"></div>
+            <div class="budget-bar-fill" id="budget-bar" style="width:0%"></div>
           </div>
-          <div class="budget-note">This project is fully funded.</div>
+          <div class="budget-note" id="budget-note">Tracking spend across all phases against our project target.</div>
         </div>
         <div class="days-card">
           <div class="days-item">
