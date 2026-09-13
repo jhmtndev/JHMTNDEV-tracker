@@ -180,6 +180,25 @@ section { padding: 6rem 2rem; }
 .live-section .section-label::before { background: var(--green-light); }
 .live-section .section-h2 { color: #fff; }
 .live-section .section-sub { color: rgba(255,255,255,.6); }
+.live-meta {
+  display: flex; flex-wrap: wrap;
+  margin: 2rem 0 2.5rem;
+  border-top: 1px solid rgba(255,255,255,.1);
+  border-bottom: 1px solid rgba(255,255,255,.1);
+}
+.meta-item {
+  padding: 1.1rem 2.5rem 1.1rem 0;
+  margin-right: 2.5rem;
+  border-right: 1px solid rgba(255,255,255,.1);
+}
+.meta-item:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+.meta-label {
+  font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: .1em;
+  text-transform: uppercase; color: rgba(255,255,255,.4);
+  margin-bottom: .4rem;
+}
+.meta-value { font-size: 15px; font-weight: 500; color: rgba(255,255,255,.92); }
 
 .live-grid {
   display: grid;
@@ -503,9 +522,15 @@ footer {
     <div class="section-label">Active Build</div>
     <h2 class="section-h2">Live Project Status</h2>
     <p class="section-sub">Real-time progress on our current build — updated by our team on the ground as each phase completes.</p>
-    <div class="live-meta" style="display:flex;gap:2rem;flex-wrap:wrap;margin:0 0 1.5rem;font-size:13px;color:rgba(255,255,255,.5);letter-spacing:.02em">
-      <span><strong style="color:rgba(255,255,255,.85)">Parcel #</strong> 173000488976</span>
-      <span><strong style="color:rgba(255,255,255,.85)">Groundbreaking</strong> September 30, 2026</span>
+    <div class="live-meta">
+      <div class="meta-item">
+        <div class="meta-label">Parcel #</div>
+        <div class="meta-value">173000488976</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Groundbreaking</div>
+        <div class="meta-value">September 30, 2026</div>
+      </div>
     </div>
     <div class="live-grid fade-up">
       <div class="live-left">
@@ -516,12 +541,12 @@ footer {
       </div>
       <div class="live-right">
         <div class="budget-card">
-          <div class="budget-card-label">Budget Status</div>
-          <div class="budget-status on-track" id="budget-status">On Track</div>
+          <div class="budget-card-label">Funding Status</div>
+          <div class="budget-status on-track">100%</div>
           <div class="budget-bar-bg">
-            <div class="budget-bar-fill" id="budget-bar" style="width:0%"></div>
+            <div class="budget-bar-fill" style="width:100%"></div>
           </div>
-          <div class="budget-note" id="budget-note">Tracking spend across all phases against our project target.</div>
+          <div class="budget-note">This project is fully funded.</div>
         </div>
         <div class="days-card">
           <div class="days-item">
