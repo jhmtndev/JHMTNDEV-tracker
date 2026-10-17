@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sell Your Land | JH Mountain Development</title>
+<meta name="description" content="Own vacant land in Western North Carolina or Upstate South Carolina? Tell us about it and get a no-obligation cash offer within 48 hours of our review.">
+
+<!-- ============================================================
+     SETUP — replace these 2 values before going live
+     1) PIXEL_ID      → your Meta Pixel (Dataset) ID from Events Manager
+     2) INTAKE_URL    → the Google Apps Script web-app URL (ends in /exec)
+     ============================================================ -->
+<script>
+  window.FUNNEL_CONFIG = {
+    PIXEL_ID: "2008790980524532",
+    INTAKE_URL: "https://script.google.com/macros/s/AKfycbz5SQt_8pdYqGjR6NgRSBiGfyl5zwEYKvLkivN50Q8UbcpQ_-XDvx53r48LLuLVoYgO/exec"
+  };
+</script>
+
+<!-- Meta Pixel -->
+<script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', window.FUNNEL_CONFIG.PIXEL_ID);
+  fbq('track', 'PageView');
+</script>
+<!-- End Meta Pixel -->
+
+<style>
+  :root{
+    --bg:#f6f3ec; --surface:#ffffff; --ink:#1f2a22; --muted:#5b665d;
+    --brand:#2f5d3a; --brand-ink:#ffffff; --accent:#c8862e; --line:#dcd6c8;
+    --err:#a33a2a;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#141a16; --surface:#1d2520; --ink:#eef1ec; --muted:#a6b0a8;
+      --brand:#4f8c5e; --line:#2e3a32; --accent:#e0a14c; --err:#e2735f; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:720px;margin:0 auto;padding:24px 16px 48px}
+  header{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.02em}
+  header .dot{width:12px;height:12px;border-radius:3px;background:var(--brand)}
+  h1{font-size:clamp(28px,6vw,40px);line-height:1.15;margin:20px 0 8px}
+  .sub{color:var(--muted);margin:0 0 20px}
+  .video{position:relative;border-radius:12px;overflow:hidden;background:#000;aspect-ratio:9/16;max-height:70vh;margin:0 auto 24px;width:100%;max-width:420px}
+  .video video{width:100%;height:100%;object-fit:cover;display:block}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .card h2{margin:0 0 4px;font-size:22px}
+  .card p.lead{margin:0 0 16px;color:var(--muted)}
+  label{display:block;font-weight:600;font-size:15px;margin:14px 0 6px}
+  input[type=text],input[type=tel],input[type=email],input[type=number]{
+    width:100%;padding:13px 12px;border:1px solid var(--line);border-radius:10px;
+    background:var(--bg);color:var(--ink);font-size:16px}
+  input:focus{outline:2px solid var(--brand);outline-offset:1px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:480px){.row{grid-template-columns:1fr}}
+  .consent{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:13px;color:var(--muted)}
+  .consent input{margin-top:3px;width:18px;height:18px;flex:none}
+  button{margin-top:18px;width:100%;padding:16px;border:0;border-radius:12px;
+    background:var(--brand);color:var(--brand-ink);font-size:18px;font-weight:700;cursor:pointer}
+  button:disabled{opacity:.6;cursor:wait}
+  .err{color:var(--err);font-size:14px;margin-top:10px;min-height:1em}
+  .steps{display:grid;gap:12px;margin:28px 0}
+  .step{display:flex;gap:12px;align-items:flex-start}
+  .num{flex:none;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;
+    display:grid;place-items:center;font-weight:700}
+  .thanks{display:none;text-align:center}
+  .thanks h2{font-size:26px}
+  footer{margin-top:36px;font-size:13px;color:var(--muted);text-align:center}
+  footer a{color:inherit}
+  .hp{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><span class="dot"></span>JH Mountain Development</header>
+
+  <h1>Own land in Western NC or Upstate SC? Get a cash offer — no agents, no fees.</h1>
+  <p class="sub">Tell us about your property. We review every lot personally and send a no-obligation cash offer within 48 hours of our review.</p>
+
+  <div class="card" id="formCard">
+    <h2>Tell us about your land</h2>
+    <p class="lead">Takes about 30 seconds.</p>
+    <form id="sellerForm" novalidate>
+      <label for="address">Property address</label>
+      <input id="address" name="address" type="text" autocomplete="street-address" placeholder="Street, city, state" required>
+
+      <label for="acreage">Approximate acreage</label>
+      <input id="acreage" name="acreage" type="number" inputmode="decimal" min="0" step="0.01" placeholder="e.g. 2.5" required>
+
+      <label for="name">Your name</label>
+      <input id="name" name="name" type="text" autocomplete="name" required>
+
+      <div class="row">
+        <div>
+          <label for="phone">Phone</label>
+          <input id="phone" name="phone" type="tel" autocomplete="tel" required>
+        </div>
+        <div>
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" autocomplete="email" required>
+        </div>
+      </div>
+
+      <!-- honeypot: bots fill this, humans never see it -->
+      <input class="hp" type="text" name="company_website" tabindex="-1" autocomplete="off">
+
+      <div class="consent">
+        <input id="consent" name="consent" type="checkbox" required>
+        <label for="consent" style="margin:0;font-weight:400">
+          By checking this box, I agree that JH Mountain Development LLC may contact me about my property by call, text (including automated technology), or email at the number and address above. Consent is not a condition of any sale. Msg &amp; data rates may apply. Reply STOP to opt out.
+        </label>
+      </div>
+
+      <button type="submit" id="submitBtn">Get My Cash Offer</button>
+      <div class="err" id="err" role="alert"></div>
+    </form>
+  </div>
+
+  <div class="card thanks" id="thanks">
+    <h2>Got it — thank you!</h2>
+    <p>We're reviewing your property now. Expect to hear from us within 48 hours. Keep an eye out for a call or text from a North Carolina number.</p>
+  </div>
+
+  <p class="sub" style="text-align:center;margin:28px 0 12px">Want to hear it again? Here's how we work.</p>
+  <!-- VSL: put vsl1.mp4, vsl2.mp4, vsl3.mp4 next to this file.
+       The page plays the one matching the ad's utm_content (vsl1/vsl2/vsl3); default vsl1. -->
+  <div class="video">
+    <video id="vsl" controls playsinline preload="metadata"></video>
+  </div>
+
+  <div class="steps">
+    <div class="step"><span class="num">1</span><div><strong>Tell us about the lot.</strong> Address and acreage is all we need to start.</div></div>
+    <div class="step"><span class="num">2</span><div><strong>We do the homework.</strong> We look at the parcel, access, and terrain before we ever call.</div></div>
+    <div class="step"><span class="num">3</span><div><strong>Get your offer.</strong> No obligation, no commissions, and you pick the closing date.</div></div>
+  </div>
+
+  <footer>
+    © <span id="yr"></span> JH Mountain Development LLC · We buy land directly from owners.<br>
+    <a href="privacy.html">Privacy Policy</a> · Equal Housing Opportunity
+  </footer>
+</div>
+
+<script>
+(function(){
+  var cfg = window.FUNNEL_CONFIG;
+  document.getElementById('yr').textContent = new Date().getFullYear();
+
+  // --- helpers ---
+  function getCookie(n){var m=document.cookie.match('(^|;)\\s*'+n+'=([^;]*)');return m?decodeURIComponent(m[2]):'';}
+  function qs(n){return new URLSearchParams(location.search).get(n)||'';}
+  function uuid(){return (crypto.randomUUID&&crypto.randomUUID())||(Date.now().toString(36)+Math.random().toString(36).slice(2));}
+
+  // Build _fbc from fbclid if the cookie isn't set yet (helps Conversions API matching)
+  var fbc = getCookie('_fbc') || (qs('fbclid') ? 'fb.1.'+Date.now()+'.'+qs('fbclid') : '');
+
+  // --- video: play the VSL that matches the ad ---
+  var v = document.getElementById('vsl'), fired = {};
+  var variant = (qs('utm_content') || '').toLowerCase();
+  if (v) v.src = (/^vsl[1-9]$/.test(variant) ? variant : 'vsl1') + '.mp4';
+
+  // --- video tracking: which VSL got watched, and how far ---
+  if (v) {
+    v.addEventListener('play', function(){
+      if(!fired.play){fired.play=1; fbq('track','ViewContent',{content_name:'VSL', content_category: qs('utm_content')||'unknown'});}
+    });
+    v.addEventListener('timeupdate', function(){
+      if(!v.duration) return;
+      var p = v.currentTime / v.duration;
+      if(p>=0.5 && !fired.half){fired.half=1; fbq('trackCustom','VSL50',{variant: qs('utm_content')||'unknown'});}
+      if(p>=0.95 && !fired.full){fired.full=1; fbq('trackCustom','VSL95',{variant: qs('utm_content')||'unknown'});}
+    });
+  }
+
+  // --- form ---
+  var form = document.getElementById('sellerForm'), err = document.getElementById('err'), btn = document.getElementById('submitBtn');
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    err.textContent = '';
+    if (form.company_website.value) return; // bot
+    if (!form.checkValidity()) {
+      var bad = form.querySelector(':invalid');
+      err.textContent = bad && bad.id === 'consent' ? 'Please check the box so we can contact you about your offer.' : 'Please fill in every field.';
+      if (bad) bad.focus();
+      return;
+    }
+    var digits = form.phone.value.replace(/\D/g,'');
+    if (digits.length < 10) { err.textContent = 'Please enter a full 10-digit phone number.'; form.phone.focus(); return; }
+
+    btn.disabled = true; btn.textContent = 'Sending…';
+    var eventId = uuid();
+
+    var data = new URLSearchParams({
+      address: form.address.value.trim(),
+      acreage: form.acreage.value.trim(),
+      name: form.name.value.trim(),
+      phone: digits,
+      email: form.email.value.trim(),
+      consent: 'yes',
+      event_id: eventId,
+      vsl_variant: qs('utm_content'),
+      utm_source: qs('utm_source'), utm_medium: qs('utm_medium'), utm_campaign: qs('utm_campaign'),
+      fbp: getCookie('_fbp'), fbc: fbc,
+      page_url: location.href.split('#')[0],
+      user_agent: navigator.userAgent
+    });
+
+    // Apps Script web apps don't return CORS headers; no-cors still delivers the POST.
+    fetch(cfg.INTAKE_URL, { method:'POST', mode:'no-cors', body:data })
+      .then(function(){
+        fbq('track','Lead',{content_name:'Land seller form', content_category: qs('utm_content')||'unknown'},{eventID:eventId});
+        document.getElementById('formCard').style.display='none';
+        var t = document.getElementById('thanks'); t.style.display='block';
+        t.scrollIntoView({behavior:'smooth', block:'center'});
+      })
+      .catch(function(){
+        btn.disabled=false; btn.textContent='Get My Cash Offer';
+        err.textContent='Something went wrong sending that. Please try again, or text us directly.';
+      });
+  });
+})();
+</script>
+</body>
+</html>
